@@ -9,7 +9,7 @@ export function useToken() {
   // Memoisasi fungsi login untuk set token
   const onlogin = useCallback(
     (token: string) => dispatch(setToken({ token })),
-    [dispatch]
+    [dispatch],
   );
 
   useEffect(() => {

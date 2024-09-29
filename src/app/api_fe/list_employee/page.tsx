@@ -36,7 +36,7 @@ export default function ListEmployee() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${dataSelecor}`,
           signature: `${hasilToken}`,
-        }
+        },
       );
       setGetData(getData || []);
     } catch (err) {

@@ -1,4 +1,6 @@
 "use client";
+import { useHttp } from "@/app/components/util/http-hook";
+import { useToken } from "@/app/components/util/tokern-hook";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -8,8 +10,18 @@ interface EmployeeFormData {
 }
 
 const PostData: React.FC = () => {
+  const [pending, setPending] = useState(false);
+  const { dataSelecor } = useToken();
+  const {
+    sendRequest,
+    setErorrPesan,
+    setErrorValidate,
+    errorPesan,
+    errorValidate,
+  } = useHttp();
   const route = useRouter();
   const adminData = localStorage.getItem("adminData");
+  const hasilToken = process.env.NEXT_PUBLIC_ACCES_TOKEN;
   const dataBrowser = adminData ? JSON.parse(adminData) : null;
   if (!dataBrowser) route.push("/");
   const [formData, setFormData] = useState<EmployeeFormData>({
@@ -24,12 +36,36 @@ const PostData: React.FC = () => {
       [name]: name === "amount" ? parseFloat(value) : value,
     }));
   };
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     // Lakukan submit form, misalnya kirim data ke API
 
     try {
-    } catch (err: unknown) {}
+      setErrorValidate(false);
+      setPending(true);
+      await sendRequest(
+        `http://localhost:8001/api_fe/postdata`,
+        "POST",
+        JSON.stringify([
+          { employee_id: +formData.employee_id, amount: +formData.amount },
+        ]),
+        {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${dataSelecor}`,
+          signature: `${hasilToken}`,
+        },
+      );
+      alert("Data disimpan");
+      setFormData({
+        employee_id: "",
+        amount: 0,
+      });
+    } catch (err: unknown) {
+      setErrorValidate(true);
+      setErorrPesan(err);
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
@@ -37,6 +73,10 @@ const PostData: React.FC = () => {
       <br />
       <p className="text-center block text-gray-700 font-bold mb-2">
         POST DATA TRANSAKSI
+      </p>
+
+      <p className="text-center bg-red-800">
+        {errorValidate ? errorPesan : ""}
       </p>
       <form
         onSubmit={handleSubmit}
@@ -78,10 +118,11 @@ const PostData: React.FC = () => {
           />
         </div>
         <button
+          disabled={pending}
           type="submit"
           className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition-colors"
         >
-          Submit
+          {pending ? "Loading" : "Submit"}
         </button>
       </form>
     </div>
