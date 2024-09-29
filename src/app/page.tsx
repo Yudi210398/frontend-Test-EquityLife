@@ -14,7 +14,7 @@ export default function Home() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
-  const tokenExpirationDate = new Date().getTime() + 3599000;
+  const tokenExpirationDate = new Date().getTime() + 3555999;
   const {
     sendRequest,
     setErrorValidate,
@@ -31,7 +31,7 @@ export default function Home() {
         `http://localhost:8001/api_fe/login`,
         "POST",
         JSON.stringify({ username, password }),
-        { "Content-Type": "application/json" }
+        { "Content-Type": "application/json" },
       );
       onLogin(res.accesToken);
       localStorage.setItem(
@@ -39,7 +39,7 @@ export default function Home() {
         JSON.stringify({
           token: res.accesToken,
           tokenexpied: tokenExpirationDate,
-        })
+        }),
       );
       router.push("api_fe/list_employee");
     } catch (err: unknown) {
